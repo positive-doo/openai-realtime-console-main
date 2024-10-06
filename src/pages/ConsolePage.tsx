@@ -8,6 +8,9 @@
  * This will also require you to set OPENAI_API_KEY= in a `.env` file
  * You can run it with `npm run relay`, in parallel with `npm start`
  */
+
+// Check if we're using the local relay server first
+
 const LOCAL_RELAY_SERVER_URL: string =
   process.env.REACT_APP_LOCAL_RELAY_SERVER_URL || '';
 
@@ -59,15 +62,17 @@ export function ConsolePage() {
    * Ask user for API Key
    * If we're using the local relay server, we don't need this
    */
+  // Get the API key from the environment variable if not using the relay server
+// Get the API key from the environment variable if not using the relay server
   const apiKey = LOCAL_RELAY_SERVER_URL
-    ? ''
-    : localStorage.getItem('tmp::voice_api_key') ||
-      prompt('OpenAI API Key') ||
-      '';
+    ? '' // No need for API key if using the relay server
+    : process.env.REACT_APP_OPENAI_API_KEY || // Check the environment variable
+      localStorage.getItem('tmp::voice_api_key') || // Fallback to localStorage
+      prompt('OpenAI API Key') || ''; // Ask the user if not found
+  
   if (apiKey !== '') {
     localStorage.setItem('tmp::voice_api_key', apiKey);
   }
-
   /**
    * Instantiate:
    * - WavRecorder (speech input)
@@ -149,11 +154,12 @@ export function ConsolePage() {
   /**
    * When you click the API key
    */
+  
   const resetAPIKey = useCallback(() => {
-    const apiKey = prompt('OpenAI API Key');
-    if (apiKey !== null) {
+    const newApiKey = prompt('OpenAI API Key');
+    if (newApiKey !== null) {
       localStorage.clear();
-      localStorage.setItem('tmp::voice_api_key', apiKey);
+      localStorage.setItem('tmp::voice_api_key', newApiKey);
       window.location.reload();
     }
   }, []);
