@@ -468,17 +468,6 @@ export function ConsolePage() {
           <img src="/logo.png" />
           <h2>Positive Realtime Audio Demo</h2>
         </div>
-        <div className="content-api-key">
-          {!LOCAL_RELAY_SERVER_URL && (
-            <Button
-              icon={Edit}
-              iconPosition="end"
-              buttonStyle="flush"
-              label={`api key: ${apiKey.slice(0, 3)}...`}
-              onClick={() => resetAPIKey()}
-            />
-          )}
-        </div>
       </div>
       <div className="content-main">
         <div className="content-logs">
