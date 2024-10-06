@@ -62,15 +62,14 @@ export function ConsolePage() {
    * Ask user for API Key
    * If we're using the local relay server, we don't need this
    */
-  // Get the API key from the environment variable if not using the relay server
-// Get the API key from the environment variable if not using the relay server
-  const apiKey = LOCAL_RELAY_SERVER_URL
-  
-    ? '' // No need for API key if using the relay server
-    : process.env.REACT_APP_OPENAI_API_KEY || // Check the environment variable
-      localStorage.getItem('tmp::voice_api_key') || // Fallback to localStorage
-      prompt('OpenAI API Key') || ''; // Ask the user if not found
-  
+  const apiKey = LOCAL_RELAY_SERVER_URL.trim() !== ''
+    ? '' // If relay server is used, skip the API key
+    : process.env.REACT_APP_OPENAI_API_KEY || 
+      localStorage.getItem('tmp::voice_api_key') || 
+      prompt('OpenAI API Key') || '';
+
+  console.log("API Key Retrieved:", apiKey);  // Log the API key
+   
   if (apiKey !== '') {
     localStorage.setItem('tmp::voice_api_key', apiKey);
   }
