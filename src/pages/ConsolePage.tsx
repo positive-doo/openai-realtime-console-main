@@ -65,6 +65,7 @@ export function ConsolePage() {
   // Get the API key from the environment variable if not using the relay server
 // Get the API key from the environment variable if not using the relay server
   const apiKey = LOCAL_RELAY_SERVER_URL
+  
     ? '' // No need for API key if using the relay server
     : process.env.REACT_APP_OPENAI_API_KEY || // Check the environment variable
       localStorage.getItem('tmp::voice_api_key') || // Fallback to localStorage
