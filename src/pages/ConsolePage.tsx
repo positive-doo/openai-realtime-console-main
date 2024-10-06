@@ -380,7 +380,11 @@ export function ConsolePage() {
     const wavStreamPlayer = wavStreamPlayerRef.current;
     const client = clientRef.current;
 
-    // Set instructions
+    // Set voice (alloy, shimer, echo)
+    client.updateSession({ voice: 'alloy' });
+     // Set temperature (min 0.7)
+    client.updateSession({ temperature: 0.8 });
+     // Set instructions
     client.updateSession({ instructions: instructions });
     // Set transcription, otherwise we don't get user transcriptions back
     client.updateSession({ input_audio_transcription: { model: 'whisper-1' } });
