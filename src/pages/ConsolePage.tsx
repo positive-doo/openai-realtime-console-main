@@ -67,7 +67,8 @@ export function ConsolePage() {
     : process.env.REACT_APP_OPENAI_API_KEY || 
       localStorage.getItem('tmp::voice_api_key') || 
       prompt('OpenAI API Key') || '';
-
+  
+  console.log("Relay Server URL:", LOCAL_RELAY_SERVER_URL);
   console.log("API Key Retrieved:", apiKey);  // Log the API key
    
   if (apiKey !== '') {
