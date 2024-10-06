@@ -533,11 +533,11 @@ export function ConsolePage() {
             </div>
           </div>
           <div className="content-actions">
-            <Toggle
-              defaultValue={false}
-              labels={['manual', 'vad']}
-              values={['none', 'server_vad']}
-              onChange={(_, value) => changeTurnEndType(value)}
+          <Toggle
+            defaultValue={'server_vad'}  // Set the default to 'server_vad' for VAD
+            labels={['manual', 'vad']}
+            values={['none', 'server_vad']}
+            onChange={(_, value) => changeTurnEndType(value)}
             />
             <div className="spacer" />
             {isConnected && canPushToTalk && (
@@ -545,10 +545,13 @@ export function ConsolePage() {
                 label={isRecording ? 'release to send' : 'push to talk'}
                 buttonStyle={isRecording ? 'alert' : 'regular'}
                 disabled={!isConnected || !canPushToTalk}
-                onMouseDown={startRecording}
-                onMouseUp={stopRecording}
+                onMouseDown={startRecording}  // For desktop browsers
+                onMouseUp={stopRecording}     // For desktop browsers
+                onTouchStart={startRecording} // For mobile devices (iPhone, Android, etc.)
+                onTouchEnd={stopRecording}    // For mobile devices (iPhone, Android, etc.)
               />
             )}
+
             <div className="spacer" />
             <Button
               label={isConnected ? 'disconnect' : 'connect'}
