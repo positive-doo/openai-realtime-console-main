@@ -70,7 +70,8 @@ export function ConsolePage() {
   
   console.log("Relay Server URL:", LOCAL_RELAY_SERVER_URL);
   console.log("API Key Retrieved:", apiKey);  // Log the API key
-   
+  console.log("API Key from Environment (process.env):", process.env.REACT_APP_OPENAI_API_KEY);
+ 
   if (apiKey !== '') {
     localStorage.setItem('tmp::voice_api_key', apiKey);
   }
