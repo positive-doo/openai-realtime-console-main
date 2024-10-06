@@ -59,7 +59,7 @@ interface RealtimeEvent {
 
 export function ConsolePage() {
   /**
-   * Ask user for API Key
+   * Ask user for API Key or
    * If we're using the local relay server, we don't need this
    */
   const apiKey = LOCAL_RELAY_SERVER_URL.trim() !== ''
