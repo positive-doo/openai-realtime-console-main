@@ -62,11 +62,23 @@ export function ConsolePage() {
    * Ask user for API Key or
    * If we're using the local relay server, we don't need this
    */
+  // Define the getImageSrc function here
+  const getImageSrc = (role: string | undefined): string => {
+    switch (role) {
+      case 'assistant':
+        return '/logo.png';
+      case 'user':
+        return '/user.webp';
+      default:
+        return '/bg.png'; // Fallback image
+    }
+  };
+
   const apiKey = LOCAL_RELAY_SERVER_URL.trim() !== ''
     ? '' // If relay server is used, skip the API key
     : process.env.REACT_APP_OPENAI_API_KEY || 
       localStorage.getItem('tmp::voice_api_key') || 
-      prompt('OpenAI API Key') || '';
+      prompt('Unesite OpenAI API Key') || '';
   
   if (apiKey !== '') {
     localStorage.setItem('tmp::voice_api_key', apiKey);
@@ -154,7 +166,7 @@ export function ConsolePage() {
    */
   
   const resetAPIKey = useCallback(() => {
-    const newApiKey = prompt('OpenAI API Key');
+    const newApiKey = prompt('Unesite OpenAI API Key');
     if (newApiKey !== null) {
       localStorage.clear();
       localStorage.setItem('tmp::voice_api_key', newApiKey);
@@ -314,7 +326,7 @@ export function ConsolePage() {
     const wavStreamPlayer = wavStreamPlayerRef.current;
     const serverCanvas = serverCanvasRef.current;
     let serverCtx: CanvasRenderingContext2D | null = null;
-
+    
     const render = () => {
       if (isLoaded) {
         if (clientCanvas) {
@@ -479,20 +491,17 @@ export function ConsolePage() {
       </div>
       <div className="content-main">
         <div className="content-logs">
-          
           <div className="content-block conversation">
-            <div className="content-block-title">conversation</div>
+            <div className="content-block-title"></div>
             <div className="content-block-body" data-conversation-content>
-              {!items.length && `awaiting connection...`}
+              {!items.length && `Povežite se...`}
               {items.map((conversationItem, i) => {
                 return (
                   <div className="conversation-item" key={conversationItem.id}>
                     <div className={`speaker ${conversationItem.role || ''}`}>
                       <div>
-                      <img src="/logo.png" width="40" height="40"/>
-                        {(
-                          conversationItem.role || conversationItem.type
-                        ).replaceAll('_', ' ')}
+                      <img src={getImageSrc(conversationItem.role)} width="40" height="40"/>
+                       
                       </div>
                       <div
                         className="close"
@@ -539,14 +548,14 @@ export function ConsolePage() {
           <div className="content-actions">
           <Toggle
             defaultValue={'server_vad'}  // Set the default to 'server_vad' for VAD
-            labels={['manual', 'vad']}
+            labels={['Ručno', 'Automatski']}
             values={['none', 'server_vad']}
             onChange={(_, value) => changeTurnEndType(value)}
             />
             <div className="spacer" />
             {isConnected && canPushToTalk && (
               <Button
-                label={isRecording ? 'release to send' : 'push to talk'}
+                label={isRecording ? 'Otpustite za slanje  ' : 'Pritisnite za govor'}
                 buttonStyle={isRecording ? 'alert' : 'regular'}
                 disabled={!isConnected || !canPushToTalk}
                 onMouseDown={startRecording}  // For desktop browsers
@@ -558,7 +567,7 @@ export function ConsolePage() {
 
             <div className="spacer" />
             <Button
-              label={isConnected ? 'disconnect' : 'connect'}
+              label={isConnected ? 'Prekinite' : 'Povežite se'}
               iconPosition={isConnected ? 'end' : 'start'}
               icon={isConnected ? X : Zap}
               buttonStyle={isConnected ? 'regular' : 'action'}
