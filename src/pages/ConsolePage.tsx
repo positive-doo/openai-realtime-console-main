@@ -182,33 +182,42 @@ export function ConsolePage() {
     const client = clientRef.current;
     const wavRecorder = wavRecorderRef.current;
     const wavStreamPlayer = wavStreamPlayerRef.current;
-
+  
     // Set state variables
     startTimeRef.current = new Date().toISOString();
     setIsConnected(true);
     setRealtimeEvents([]);
     setItems(client.conversation.getItems());
-
+  
     // Connect to microphone
     await wavRecorder.begin();
-
+  
     // Connect to audio output
     await wavStreamPlayer.connect();
-
+  
     // Connect to realtime API
     await client.connect();
+  
+    // Ensure that server_vad is set explicitly after connecting
+    // await client.updateSession({
+    //   turn_detection: { type: 'none' }
+    // });
+  
     client.sendUserMessageContent([
       {
         type: `input_text`,
         text: ` `,
-        // text: `For testing purposes, I want you to list ten car brands. Number each item, e.g. "one (or whatever number you are one): the item name".`
       },
     ]);
-
+  
+    // Ensure that recording starts if VAD is set to 'server_vad'
     if (client.getTurnDetectionType() === 'server_vad') {
+      setCanPushToTalk(false); // Disable manual mode
+      setIsRecording(true);  // Ensure recording state is set
       await wavRecorder.record((data) => client.appendInputAudio(data.mono));
     }
   }, []);
+  
 
   /**
    * Disconnect and reset conversation state
@@ -494,7 +503,22 @@ export function ConsolePage() {
           <div className="content-block conversation">
             <div className="content-block-title"></div>
             <div className="content-block-body" data-conversation-content>
-              {!items.length && `Povežite se...`}
+              {!items.length && (
+                  <div className="welcome-message">
+                    <span style={{ fontWeight: 'bold', color: 'white', fontSize: '15px' }}>
+                      Dobar dan, dobro došli u Positive Realtime Audio Demo. Povežite se i postavite pitanje...
+                    </span>
+                    <br></br>
+                    <br></br>
+                    <li style={{ color: 'white', fontSize: '12px' }}>
+                      Možete me prekinuti u svakom momentu i promeniti tok razgovora.
+                    </li>
+                    <br></br>
+                    <li style={{ color: 'white', fontSize: '12px' }}>
+                      Takođe, možete birati između automatskog i ručnog metoda postavljanja pitanja.
+                    </li>
+                  </div>
+                )}
               {items.map((conversationItem, i) => {
                 return (
                   <div className="conversation-item" key={conversationItem.id}>
@@ -519,9 +543,9 @@ export function ConsolePage() {
                           <div>
                             {conversationItem.formatted.transcript ||
                               (conversationItem.formatted.audio?.length
-                                ? '(awaiting transcript)'
+                                ? '(Čekam)'
                                 : conversationItem.formatted.text ||
-                                  '(item sent)')}
+                                  '(Poslato)')}
                           </div>
                         )}
                       {!conversationItem.formatted.tool &&
@@ -530,7 +554,7 @@ export function ConsolePage() {
                             
                             {conversationItem.formatted.transcript ||
                               conversationItem.formatted.text ||
-                              '(truncated)'}
+                              '(Skraćeno)'}
                           </div>
                         )}
                       {conversationItem.formatted.file && (
@@ -547,7 +571,7 @@ export function ConsolePage() {
           </div>
           <div className="content-actions">
           <Toggle
-            defaultValue={'server_vad'}  // Set the default to 'server_vad' for VAD
+            defaultValue={'none'}  // Set the default to 'server_vad' for VAD
             labels={['Ručno', 'Automatski']}
             values={['none', 'server_vad']}
             onChange={(_, value) => changeTurnEndType(value)}
