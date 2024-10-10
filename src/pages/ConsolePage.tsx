@@ -26,7 +26,11 @@ import { X, Edit, Zap, ArrowUp, ArrowDown } from 'react-feather';
 import { Button } from '../components/button/Button';
 import { Toggle } from '../components/toggle/Toggle';
 import { Map } from '../components/Map';
-
+import MicIcon from '@mui/icons-material/Mic'
+import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import StopIcon from '@mui/icons-material/Stop';
 import './ConsolePage.scss';
 import { isJsxOpeningLikeElement } from 'typescript';
 
@@ -63,16 +67,7 @@ export function ConsolePage() {
    * If we're using the local relay server, we don't need this
    */
   // Define the getImageSrc function here
-  const getImageSrc = (role: string | undefined): string => {
-    switch (role) {
-      case 'assistant':
-        return '/logo.png';
-      case 'user':
-        return '/user.webp';
-      default:
-        return '/bg.png'; // Fallback image
-    }
-  };
+  
 
   const apiKey = LOCAL_RELAY_SERVER_URL.trim() !== ''
     ? '' // If relay server is used, skip the API key
@@ -522,11 +517,7 @@ export function ConsolePage() {
               {items.map((conversationItem, i) => {
                 return (
                   <div className="conversation-item" key={conversationItem.id}>
-                    <div className={`speaker ${conversationItem.role || ''}`}>
-                      <div>
-                      <img src={getImageSrc(conversationItem.role)} width="40" height="40"/>
-                       
-                      </div>
+                    <div className={`speaker ${conversationItem.role}`}>
                       <div
                         className="close"
                         onClick={() =>
@@ -536,27 +527,31 @@ export function ConsolePage() {
                         <X />
                       </div>
                     </div>
-                    <div className={`speaker-content`}>
+                    {conversationItem.role === 'assistant' && (
+                        <div className="assistant-avatar">
+                          <img
+                            src='/logo.png'
+                            style={{ width: '35px', height: '35px', paddingRight: '5px' }}
+                            alt='Assistant Avatar'
+                          />
+                        </div>
+                      )
+                    }
+                    <div className={`speaker-content ${conversationItem.role}`}>
                       
-                      {!conversationItem.formatted.tool &&
-                        conversationItem.role === 'user' && (
-                          <div>
-                            {conversationItem.formatted.transcript ||
-                              (conversationItem.formatted.audio?.length
-                                ? '(Čekam)'
-                                : conversationItem.formatted.text ||
-                                  '(Poslato)')}
-                          </div>
-                        )}
                       {!conversationItem.formatted.tool &&
                         conversationItem.role === 'assistant' && (
                           <div>
-                            
-                            {conversationItem.formatted.transcript ||
-                              conversationItem.formatted.text ||
-                              '(Skraćeno)'}
+                            {conversationItem.formatted.transcript ? (
+                              conversationItem.formatted.transcript.split('**').map((part, index) =>
+                                index % 2 === 1 ? <strong key={index}>{part}</strong> : part
+                              )
+                            ) : (
+                              conversationItem.formatted.text 
+                            )}
                           </div>
-                        )}
+                        )
+                      }
                       {conversationItem.formatted.file && (
                         <audio
                           src={conversationItem.formatted.file.url}
@@ -578,27 +573,35 @@ export function ConsolePage() {
             />
             <div className="spacer" />
             {isConnected && canPushToTalk && (
-              <Button
-                label={isRecording ? 'Otpustite za slanje  ' : 'Pritisnite za govor'}
-                buttonStyle={isRecording ? 'alert' : 'regular'}
+              <IconButton
+                style={{ color: '#f33b4b', marginRight: '30px' }} 
                 disabled={!isConnected || !canPushToTalk}
                 onMouseDown={startRecording}  // For desktop browsers
                 onMouseUp={stopRecording}     // For desktop browsers
                 onTouchStart={startRecording} // For mobile devices (iPhone, Android, etc.)
                 onTouchEnd={stopRecording}    // For mobile devices (iPhone, Android, etc.)
-              />
+              >
+              <MicIcon />
+              </IconButton>
             )}
 
             <div className="spacer" />
-            <Button
-              label={isConnected ? 'Prekinite' : 'Povežite se'}
-              iconPosition={isConnected ? 'end' : 'start'}
-              icon={isConnected ? X : Zap}
-              buttonStyle={isConnected ? 'regular' : 'action'}
-              onClick={
-                isConnected ? disconnectConversation : connectConversation
-              }
-            />
+              <IconButton
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  color: '#fff',
+                  borderRadius: '50%',
+                  border: '1px solid #f33b4b', 
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: '#2a2a2a',
+                }}
+                onClick={isConnected ? disconnectConversation : connectConversation}
+              >
+                {isConnected ? <StopIcon /> : <PlayArrowIcon />}
+              </IconButton>
           </div>
         </div>
         

@@ -1,5 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400&display=swap');
+
 [data-component='ConsolePage'] {
-  font-family: 'Roboto Mono', Arial, sans-serif;
+  font-family: 'Roboto', Arial, sans-serif;
   font-weight: 400;
   color: #ffff;
   background-color: #3d3d3d;
@@ -10,11 +12,18 @@
   flex-direction: column;
   align-items: center;
   overflow: hidden;
-  margin: 0px 8px;
+  border-radius: 25px;
+
+  
 
   @media (min-width: 768px) {
-    margin: 0px 16px;
+    margin: 0px;
     font-size: 14px;
+  }
+
+  @media (max-width: 767px) {
+    font-size: 10px;
+    padding: 10px;
   }
 
   & > div {
@@ -23,6 +32,10 @@
 
   .spacer {
     flex-grow: 1;
+  }
+
+  audio {
+    margin-top: 15px !important;
   }
 
   .content-top {
@@ -38,8 +51,8 @@
     }
 
     .content-title h2 {
-      font-size: 1.5em; /* adjust the size of the H2 if needed */
-      color: #ffffff;   /* adjust the color if necessary */
+      font-size: 1.5em; 
+      color: #ffffff;  
     }
     .content-title {
       flex-grow: 1;
@@ -51,10 +64,18 @@
         width: 40px;
         height: 40px;
       }
+
+      @media (max-width: 767px) {
+        img {
+          width: 30px;
+          height: 30px;
+        }
+      }
     }
   }
 
   .content-main {
+    position: relative;
     flex-grow: 1;
     flex-shrink: 1 !important;
     margin: 0px 16px;
@@ -74,12 +95,24 @@
       width: 70%;
     }
 
+    @media (max-width: 767px) {
+      padding: 0;
+    }
+
     .content-block {
       position: relative;
       display: flex;
       flex-direction: column;
       max-height: 100%;
-      width: 70%;
+      width: 100%;
+
+      @media (min-width: 768px) {
+        width: 70%;
+      }
+
+      @media (max-width: 767px) {
+        width: 100%;
+      }  
 
       .content-block-title {
         flex-shrink: 0;
@@ -173,7 +206,6 @@
 
       & > .content-actions {
         flex-grow: 0;
-        flex-shrink: 0;
         display: flex;
         width: 100%;
         align-items: center;
@@ -215,9 +247,16 @@
     display: flex;
     gap: 16px;
     margin-bottom: 16px;
+    line-height: 1.5;
+    font-weight: 300;
+    letter-spacing: 1px;
 
     &:not(:hover) .close {
       display: none;
+    }
+
+    @media (max-width: 767px) {
+      gap: 8px;
     }
 
     .close {
@@ -243,27 +282,44 @@
     }
 
     .speaker {
+      font-family: 'Roboto', sans-serif;
       position: relative;
       text-align: left;
       gap: 16px;
-      width: 80px;
       flex-shrink: 0;
-      margin-right: 16px;
-
-      &.user {
-        color: #0099ff;
-      }
-
-      &.assistant {
-        color: #009900;
-      }
+      line-height: 1.5;
+      font-weight: 300;
+      letter-spacing: 1px;
     }
 
     .speaker-content {
-      color: #ffffff;
-      overflow: hidden;
-      line-height: 300%;
-      word-wrap: break-word;
+      max-width: 100%; 
+      border-radius: 20px;
+      padding: 5px 8px;
+      margin-top: 5px;
+      margin-bottom: 5px;
+      max-width: 400px;
+      font-size: 16px;
+      width: fit-content;
+      position: relative;
+
+      &.user {
+        color: #fff;
+        margin-left: auto;
+        margin-right: 10px;
+        background: linear-gradient(145deg, #f33b4b, #f33b4b);
+        background-attachment: fixed;
+        position: relative;
+
+      }
+
+      &.assistant {
+        color: #fff;
+        margin-left: -10px;
+        background: #2a2a2a;
+        background-attachment: fixed;
+        position: relative;
+      }
     }
   }
 
