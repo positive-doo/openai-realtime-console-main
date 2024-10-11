@@ -490,7 +490,7 @@ export function ConsolePage() {
       <div className="content-top">
         <div className="content-title">
           <img src="/logo.png" />
-          <h2>Positive Realtime Audio Demo</h2>
+          <h2>Positive Realtime Audio Asistent</h2>
         </div>
       </div>
       <div className="content-main">
@@ -501,7 +501,7 @@ export function ConsolePage() {
               {!items.length && (
                   <div className="welcome-message">
                     <span style={{ fontWeight: 'bold', color: 'white', fontSize: '15px' }}>
-                      Dobar dan, dobro došli u Positive Realtime Audio Demo. Povežite se i postavite pitanje...
+                      Dobar dan, dobro došli u Positive Realtime Audio Asistenta. Povežite se pritiskom na ikonicu play i postavite pitanje...
                     </span>
                     <br></br>
                     <br></br>
@@ -510,7 +510,7 @@ export function ConsolePage() {
                     </li>
                     <br></br>
                     <li style={{ color: 'white', fontSize: '12px' }}>
-                      Takođe, možete birati između automatskog i ručnog metoda postavljanja pitanja.
+                      Takođe, možete birati između automatskog i ručnog metoda postavljanja pitanja. U ručnom modu pritisnite ikonicu mikrofon i držite dok postavljate pitanje.
                     </li>
                   </div>
                 )}
