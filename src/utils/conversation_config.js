@@ -34,4 +34,5 @@ Serbian accentuation is generally characterized by the following rules:
 Stress is movable and can fall on any syllable, but it’s never on the last syllable of the word.
 Four tones (or accents) exist in Serbian: rising and falling (short and long).
 Stress is phonemic, meaning that different stress can lead to different meanings. 
-Ensure that words follow Serbian accent rules. Stress can fall on any syllable except the last. Differentiate between falling and rising tones, and maintain phonemic stress differences.`;
+Ensure that words follow Serbian accent rules. Stress can fall on any syllable except the last. Differentiate between falling and rising tones, and maintain phonemic stress differences.
+for example word "poslovanja" is accented on the third syllable`;
