@@ -108,10 +108,10 @@ This server is **only a simple message relay**, but it can be extended to:
 
 You will have to implement these features yourself.
 
-# Realtime API reference client
+## Realtime API reference client
 
 The latest reference client and documentation are available on GitHub at
-[openai/openai-realtime-api-beta](https://github.com/openai/openai-realtime-api-beta).
+[djordjethai/positive-realtime](https://github.com/djordjethai/positive-realtime).
 
 You can use this client yourself in any React (front-end) or Node.js project.
 For full documentation, refer to the GitHub repository, but you can use the
