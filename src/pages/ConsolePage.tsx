@@ -397,7 +397,7 @@ export function ConsolePage() {
     const client = clientRef.current;
 
     // Set voice (alloy, shimer, echo, coral, sage)
-    client.updateSession({ voice: 'sage' });
+    client.updateSession({ voice: 'coral' });
      // Set temperature (min 0.7)
     client.updateSession({ temperature: 0.8 });
      // Set instructions
