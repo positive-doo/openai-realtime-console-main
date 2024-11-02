@@ -16,8 +16,8 @@ const LOCAL_RELAY_SERVER_URL: string =
 
 import { useEffect, useRef, useCallback, useState } from 'react';
 
-import { RealtimeClient } from '@openai/realtime-api-beta';
-import { ItemType } from '@openai/realtime-api-beta/dist/lib/client.js';
+import { RealtimeClient } from '@djordjethai/positive-realtime';
+import { ItemType } from '@djordjethai/positive-realtime/dist/lib/client.js';
 import { WavRecorder, WavStreamPlayer } from '../lib/wavtools/index.js';
 import { instructions } from '../utils/conversation_config.js';
 import { WavRenderer } from '../utils/wav_renderer';
@@ -396,8 +396,8 @@ export function ConsolePage() {
     const wavStreamPlayer = wavStreamPlayerRef.current;
     const client = clientRef.current;
 
-    // Set voice (alloy, shimer, echo)
-    client.updateSession({ voice: 'alloy' });
+    // Set voice (alloy, shimer, echo, coral, sage)
+    client.updateSession({ voice: 'sage' });
      // Set temperature (min 0.7)
     client.updateSession({ temperature: 0.8 });
      // Set instructions
