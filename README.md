@@ -2,7 +2,7 @@
 
 The OpenAI Realtime Console is intended as an inspector and interactive API reference
 for the OpenAI Realtime API. It comes packaged with two utility libraries,
-[openai/openai-realtime-api-beta](https://github.com/openai/openai-realtime-api-beta)
+[djordjethai/positive-realtime](https://github.com/djordjethai/positive-realtime)
 that acts as a **Reference Client** (for browser and Node.js) and
 [`/src/lib/wavtools`](./src/lib/wavtools) which allows for simple audio
 management in the browser.
@@ -118,7 +118,7 @@ For full documentation, refer to the GitHub repository, but you can use the
 guide here as a primer to get started.
 
 ```javascript
-import { RealtimeClient } from '/src/lib/realtime-api-beta/index.js';
+import { RealtimeClient } from '/src/lib/positive-realtime/index.js';
 
 const client = new RealtimeClient({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -225,7 +225,7 @@ anything it has generated that is ahead of where the user's state is.
 There are five main client events for application control flow in `RealtimeClient`.
 Note that this is only an overview of using the client, the full Realtime API
 event specification is considerably larger, if you need more control check out the GitHub repository:
-[openai/openai-realtime-api-beta](https://github.com/openai/openai-realtime-api-beta).
+[djordjethai/positive-realtime](https://github.com/djordjethai/positive-realtime).
 
 ```javascript
 // errors like connection failures
