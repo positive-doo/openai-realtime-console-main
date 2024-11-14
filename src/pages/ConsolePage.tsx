@@ -19,7 +19,7 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { RealtimeClient } from '@djordjethai/positive-realtime';
 import { ItemType } from '@djordjethai/positive-realtime/dist/lib/client.js';
 import { WavRecorder, WavStreamPlayer } from '../lib/wavtools/index.js';
-import { instructions } from '../utils/conversation_config.js';
+import { instructions, touristInstructions, positiveInstructions } from '../utils/conversation_config.js';
 import { WavRenderer } from '../utils/wav_renderer';
 
 import { X, Edit, Zap, ArrowUp, ArrowDown } from 'react-feather';
@@ -126,6 +126,9 @@ export function ConsolePage() {
     [key: string]: boolean;
   }>({});
   const [isConnected, setIsConnected] = useState(false);
+  const [selectedVoice, setSelectedVoice] = useState('coral');
+  const [selectedTemplate, setSelectedTemplate] = useState(""); // Track the selected template
+  const [editableInstructions, setEditableInstructions] = useState(""); // Instructions that user can edit
   const [canPushToTalk, setCanPushToTalk] = useState(true);
   const [isRecording, setIsRecording] = useState(false);
   const [memoryKv, setMemoryKv] = useState<{ [key: string]: any }>({});
@@ -134,7 +137,8 @@ export function ConsolePage() {
     lng: -122.418137,
   });
   const [marker, setMarker] = useState<Coordinates | null>(null);
-
+  const combinedInstructions = `${instructions} ${editableInstructions}`;
+  
   /**
    * Utility for formatting the timing of logs
    */
@@ -168,7 +172,18 @@ export function ConsolePage() {
       window.location.reload();
     }
   }, []);
-
+  const handleVoiceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedVoice(event.target.value as "coral" | "sage" | "shimmer" | "alloy" | "echo");
+  };
+  const handleTemplateChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedTemplate(event.target.value);
+    setEditableInstructions(event.target.value); // Optionally update editableInstructions based on template
+  };
+  
+  const handleInstructionsChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setEditableInstructions(event.target.value);
+  };
+  
   /**
    * Connect to conversation:
    * WavRecorder taks speech input, WavStreamPlayer output, client is API client
@@ -177,6 +192,7 @@ export function ConsolePage() {
     const client = clientRef.current;
     const wavRecorder = wavRecorderRef.current;
     const wavStreamPlayer = wavStreamPlayerRef.current;
+   
   
     // Set state variables
     startTimeRef.current = new Date().toISOString();
@@ -213,7 +229,7 @@ export function ConsolePage() {
     }
   }, []);
   
-
+  
   /**
    * Disconnect and reset conversation state
    */
@@ -397,11 +413,12 @@ export function ConsolePage() {
     const client = clientRef.current;
 
     // Set voice (alloy, shimer, echo, coral, sage)
-    client.updateSession({ voice: 'coral' });
+    client.updateSession({ voice: selectedVoice as "coral" | "sage" | "shimmer" | "alloy" | "echo" });
+    //client.updateSession({ voice: 'coral' });
      // Set temperature (min 0.7)
     client.updateSession({ temperature: 0.8 });
      // Set instructions
-    client.updateSession({ instructions: instructions });
+    client.updateSession({ instructions: combinedInstructions });
     // Set transcription, otherwise we don't get user transcriptions back
     client.updateSession({ input_audio_transcription: { model: 'whisper-1' } });
 
@@ -480,8 +497,10 @@ export function ConsolePage() {
       // cleanup; resets to defaults
       client.reset();
     };
-  }, []);
+  } , [selectedVoice, combinedInstructions]);
 
+ 
+  
   /**
    * Render the application
    */
@@ -489,122 +508,150 @@ export function ConsolePage() {
     <div data-component="ConsolePage">
       <div className="content-top">
         <div className="content-title">
-          <img src="/logo.png" />
+          <img src="/logo.png" alt="Logo" />
           <h2>Positive Realtime Audio Asistent</h2>
         </div>
       </div>
+  
       <div className="content-main">
         <div className="content-logs">
           <div className="content-block conversation">
-            <div className="content-block-title"></div>
             <div className="content-block-body" data-conversation-content>
               {!items.length && (
-                  <div className="welcome-message">
-                    <span style={{ fontWeight: 'bold', color: 'white', fontSize: '15px' }}>
-                      Dobar dan, dobro došli u Positive Realtime Audio Asistenta. Povežite se pritiskom na ikonicu play i postavite pitanje...
-                    </span>
-                    <br></br>
-                    <br></br>
-                    <li style={{ color: 'white', fontSize: '12px' }}>
-                      Možete me prekinuti u svakom momentu i promeniti tok razgovora.
-                    </li>
-                    <br></br>
-                    <li style={{ color: 'white', fontSize: '12px' }}>
+                <div className="welcome-message">
+                  <span>
+                    Dobar dan, dobro došli u Positive Realtime Audio Asistenta. Povežite se pritiskom na ikonicu play i postavite pitanje...
+                  </span>
+                  <ul>
+                    <li>Možete me prekinuti u svakom momentu i promeniti tok razgovora.</li>
+                    <li>
                       Takođe, možete birati između automatskog i ručnog metoda postavljanja pitanja. U ručnom modu pritisnite ikonicu mikrofon i držite dok postavljate pitanje.
                     </li>
-                  </div>
-                )}
-              {items.map((conversationItem, i) => {
-                return (
-                  <div className="conversation-item" key={conversationItem.id}>
-                    <div className={`speaker ${conversationItem.role}`}>
-                      <div
-                        className="close"
-                        onClick={() =>
-                          deleteConversationItem(conversationItem.id)
-                        }
-                      >
-                        <X />
-                      </div>
+                  </ul>
+  
+                  <label htmlFor="voice-select" className="voice-select-label">Odaberite glas:</label>
+                  <select
+                    id="voice-select"
+                    className="voice-select"
+                    value={selectedVoice}
+                    onChange={handleVoiceChange}
+                  >
+                    <option value="alloy">Alloy</option>
+                    <option value="shimer">Shimer</option>
+                    <option value="echo">Echo</option>
+                    <option value="coral">Coral</option>
+                    <option value="sage">Sage</option>
+                  </select>
+  
+                  <label htmlFor="instructions-template" className="instructions-select-label">Odaberite template:</label>
+                  <select
+                    id="instructions-template"
+                    className="voice-select"
+                    value={selectedTemplate}
+                    onChange={handleTemplateChange}
+                  >
+                    <option value={touristInstructions}>Turisticka agencija</option>
+                    <option value={positiveInstructions}>Positive</option>
+                  </select>
+  
+                  <label htmlFor="editable-instructions" className="editable-instructions-label">Editable Instructions:</label>
+                  <textarea
+                    id="editable-instructions"
+                    value={editableInstructions}
+                    onChange={handleInstructionsChange}
+                    className="editable-instructions"
+                    placeholder="Enter additional instructions here..."
+                  />
+                </div>
+              )}
+  
+              {items.map((conversationItem) => (
+                <div className="conversation-item" key={conversationItem.id}>
+                  <div className={`speaker ${conversationItem.role}`}>
+                    <div
+                      className="close"
+                      onClick={() => deleteConversationItem(conversationItem.id)}
+                    >
+                      <X />
                     </div>
-                    {conversationItem.role === 'assistant' && (
-                        <div className="assistant-avatar">
-                          <img
-                            src='/logo.png'
-                            style={{ width: '35px', height: '35px', paddingRight: '5px' }}
-                            alt='Assistant Avatar'
-                          />
+                  </div>
+  
+                  {conversationItem.role === 'assistant' && (
+                    <div className="assistant-avatar">
+                      <img
+                        src="/logo.png"
+                        style={{ width: '35px', height: '35px', paddingRight: '5px' }}
+                        alt="Assistant Avatar"
+                      />
+                    </div>
+                  )}
+  
+                  <div className={`speaker-content ${conversationItem.role}`}>
+                    {!conversationItem.formatted.tool &&
+                      conversationItem.role === 'assistant' && (
+                        <div>
+                          {conversationItem.formatted.transcript ? (
+                            conversationItem.formatted.transcript.split('**').map((part, index) =>
+                              index % 2 === 1 ? <strong key={index}>{part}</strong> : part
+                            )
+                          ) : (
+                            conversationItem.formatted.text
+                          )}
                         </div>
-                      )
-                    }
-                    <div className={`speaker-content ${conversationItem.role}`}>
-                      
-                      {!conversationItem.formatted.tool &&
-                        conversationItem.role === 'assistant' && (
-                          <div>
-                            {conversationItem.formatted.transcript ? (
-                              conversationItem.formatted.transcript.split('**').map((part, index) =>
-                                index % 2 === 1 ? <strong key={index}>{part}</strong> : part
-                              )
-                            ) : (
-                              conversationItem.formatted.text 
-                            )}
-                          </div>
-                        )
-                      }
-                      {conversationItem.formatted.file && (
-                        <audio
-                          src={conversationItem.formatted.file.url}
-                          controls
-                        />
                       )}
-                    </div>
+                    {conversationItem.formatted.file && (
+                      <audio
+                        src={conversationItem.formatted.file.url}
+                        controls
+                      />
+                    )}
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
           </div>
+  
           <div className="content-actions">
-          <Toggle
-            defaultValue={'none'}  // Set the default to 'server_vad' for VAD
-            labels={['Ručno', 'Automatski']}
-            values={['none', 'server_vad']}
-            onChange={(_, value) => changeTurnEndType(value)}
+            <Toggle
+              defaultValue={'none'}
+              labels={['Ručno', 'Automatski']}
+              values={['none', 'server_vad']}
+              onChange={(_, value) => changeTurnEndType(value)}
             />
             <div className="spacer" />
+  
             {isConnected && canPushToTalk && (
               <IconButton
-                style={{ color: '#f33b4b', marginRight: '30px' }} 
+                style={{ color: '#f33b4b', marginRight: '30px' }}
                 disabled={!isConnected || !canPushToTalk}
-                onMouseDown={startRecording}  // For desktop browsers
-                onMouseUp={stopRecording}     // For desktop browsers
-                onTouchStart={startRecording} // For mobile devices (iPhone, Android, etc.)
-                onTouchEnd={stopRecording}    // For mobile devices (iPhone, Android, etc.)
+                onMouseDown={startRecording}
+                onMouseUp={stopRecording}
+                onTouchStart={startRecording}
+                onTouchEnd={stopRecording}
               >
-              <MicIcon />
+                <MicIcon />
               </IconButton>
             )}
-
+  
             <div className="spacer" />
-              <IconButton
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  color: '#fff',
-                  borderRadius: '50%',
-                  border: '1px solid #f33b4b', 
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: '#2a2a2a',
-                }}
-                onClick={isConnected ? disconnectConversation : connectConversation}
-              >
-                {isConnected ? <StopIcon /> : <PlayArrowIcon />}
-              </IconButton>
+            <IconButton
+              style={{
+                width: '40px',
+                height: '40px',
+                color: '#fff',
+                borderRadius: '50%',
+                border: '1px solid #f33b4b',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#2a2a2a',
+              }}
+              onClick={isConnected ? disconnectConversation : connectConversation}
+            >
+              {isConnected ? <StopIcon /> : <PlayArrowIcon />}
+            </IconButton>
           </div>
         </div>
-        
       </div>
     </div>
   );

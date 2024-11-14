@@ -98,7 +98,79 @@
     @media (max-width: 767px) {
       padding: 0;
     }
+    .welcome-message {
+      font-size: 15px;
+      color: white;
+      line-height: 110%;
+    }
+    
+    .welcome-message span {
+      font-weight: bold;
+      font-size: 15px;
+      display: block;
+      margin-bottom: 10px;
+    }
+    
+    .welcome-message ul li {
+      font-size: 12px;
+      color: white;
+      margin-bottom: 5px;
+    }
+    
+    .voice-select-label {
+      font-size: 15px;
+      color: white;
+      display: block;
+      margin-top: 10px;
+      line-height: 120%;
+    }
+    
+    .voice-select {
+      background-color: #2a2a2a;
+      font-size: 15px;
+      color: white;
+      border-radius: 4px;
+      border: 1px solid
+    
 
+  }
+    .instructions-container {
+      margin-top: 15px;
+    }
+    
+    #editable-instructions {
+      margin-top: 15px;
+      width: 90%;
+      height: 170px;
+      padding: 8px;
+      font-size: 14px;
+      background-color: #2a2a2a;
+      color: white;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      resize: vertical;
+    }
+    .welcome-message {
+      font-size: 15px;
+      color: white;
+      margin-bottom: 15px;
+    }
+    
+    .voice-select,
+    .instructions-select-label {
+      display: block;
+      margin: 10px 0;
+      font-size: 14px;
+      color: white;
+    }
+    
+    
+    .editable-instructions:focus {
+      outline: none;
+      border-color: #f33b4b;
+      box-shadow: 0 0 5px rgba(243, 59, 75, 0.5);
+    }
+    
     .content-block {
       position: relative;
       display: flex;
@@ -177,6 +249,8 @@
             bottom: 16px;
             right: 16px;
           }
+
+          
         }
       }
 
