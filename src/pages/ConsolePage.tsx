@@ -126,9 +126,9 @@ export function ConsolePage() {
     [key: string]: boolean;
   }>({});
   const [isConnected, setIsConnected] = useState(false);
-  const [selectedVoice, setSelectedVoice] = useState('coral');
-  const [selectedTemplate, setSelectedTemplate] = useState(""); // Track the selected template
-  const [editableInstructions, setEditableInstructions] = useState(""); // Instructions that user can edit
+  const [selectedVoice, setSelectedVoice] = useState('shimmer');
+  const [selectedTemplate, setSelectedTemplate] = useState(touristInstructions); // Track the selected template
+  const [editableInstructions, setEditableInstructions] = useState(touristInstructions); // Instructions that user can edit
   const [canPushToTalk, setCanPushToTalk] = useState(true);
   const [isRecording, setIsRecording] = useState(false);
   const [memoryKv, setMemoryKv] = useState<{ [key: string]: any }>({});
@@ -137,8 +137,8 @@ export function ConsolePage() {
     lng: -122.418137,
   });
   const [marker, setMarker] = useState<Coordinates | null>(null);
-  const combinedInstructions = `${instructions} ${editableInstructions}`;
-  
+  const [combinedInstructions, setCombinedInstructions] = useState(`${instructions} ${editableInstructions}`);
+
   /**
    * Utility for formatting the timing of logs
    */
@@ -173,16 +173,22 @@ export function ConsolePage() {
     }
   }, []);
   const handleVoiceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedVoice(event.target.value as "coral" | "sage" | "shimmer" | "alloy" | "echo");
+    setSelectedVoice(event.target.value as "coral" | "sage" | "shimmer" | "alloy" | "echo" | "ash" | "ballad" | "verse"); 
+
   };
-  const handleTemplateChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedTemplate(event.target.value);
-    setEditableInstructions(event.target.value); // Optionally update editableInstructions based on template
-  };
-  
   const handleInstructionsChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    // Update editable instructions from the text area
     setEditableInstructions(event.target.value);
   };
+  
+  const handleTemplateChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedValue = event.target.value;
+  
+    // Update selected template and editable instructions
+    setSelectedTemplate(selectedValue); // This triggers the first useEffect
+    setEditableInstructions(selectedValue); // Synchronize with selected template
+  };
+  
   
   /**
    * Connect to conversation:
@@ -333,6 +339,23 @@ export function ConsolePage() {
     }
   }, [items]);
 
+ 
+  useEffect(() => {
+    setEditableInstructions(selectedTemplate);
+  }, [selectedTemplate]);
+
+  useEffect(() => {
+    const combined = `${instructions} ${editableInstructions}`;
+    setCombinedInstructions(combined);
+  
+    // Push combined instructions to the client session
+    const client = clientRef.current;
+    if (client) {
+      client.updateSession({ instructions: combined });
+    }
+  }, [instructions, editableInstructions]);
+  
+
   /**
    * Set up render loops for the visualization canvas
    */
@@ -412,9 +435,9 @@ export function ConsolePage() {
     const wavStreamPlayer = wavStreamPlayerRef.current;
     const client = clientRef.current;
 
-    // Set voice (alloy, shimer, echo, coral, sage)
-    client.updateSession({ voice: selectedVoice as "coral" | "sage" | "shimmer" | "alloy" | "echo" });
-    //client.updateSession({ voice: 'coral' });
+    // Set voice (alloy, shimmer, echo, coral, sage)
+    client.updateSession({ voice: selectedVoice as "coral" | "sage" | "shimmer" | "alloy"  | "echo" | "ash" | "ballad" | "verse" });
+   // client.updateSession({ voice: 'coral' });
      // Set temperature (min 0.7)
     client.updateSession({ temperature: 0.8 });
      // Set instructions
@@ -536,11 +559,14 @@ export function ConsolePage() {
                     value={selectedVoice}
                     onChange={handleVoiceChange}
                   >
+                    <option value="shimmer">Shimmer</option>
                     <option value="alloy">Alloy</option>
-                    <option value="shimer">Shimer</option>
                     <option value="echo">Echo</option>
                     <option value="coral">Coral</option>
                     <option value="sage">Sage</option>
+                    <option value="ash">Ash</option>
+                    <option value="ballad">Ballad</option>
+                    <option value="verse">Verse</option>
                   </select>
   
                   <label htmlFor="instructions-template" className="instructions-select-label">Odaberite template:</label>
@@ -578,12 +604,13 @@ export function ConsolePage() {
   
                   {conversationItem.role === 'assistant' && (
                     <div className="assistant-avatar">
-                      <img
-                        src="/logo.png"
-                        style={{ width: '35px', height: '35px', paddingRight: '5px' }}
-                        alt="Assistant Avatar"
-                      />
-                    </div>
+                    <img
+                      src="/logo.png"
+                      className="assistant-avatar-img"
+                      alt="Assistant Avatar"
+                    />
+                  </div>
+                  
                   )}
   
                   <div className={`speaker-content ${conversationItem.role}`}>
