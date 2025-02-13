@@ -9,8 +9,6 @@
  * You can run it with `npm run relay`, in parallel with `npm start`
  */
 
-// Check if we're using the local relay server first
-
 const LOCAL_RELAY_SERVER_URL: string =
   process.env.REACT_APP_LOCAL_RELAY_SERVER_URL || '';
 
@@ -26,7 +24,7 @@ import { X, Edit, Zap, ArrowUp, ArrowDown } from 'react-feather';
 import { Button } from '../components/button/Button';
 import { Toggle } from '../components/toggle/Toggle';
 import { Map } from '../components/Map';
-import MicIcon from '@mui/icons-material/Mic'
+import MicIcon from '@mui/icons-material/Mic';
 import Tooltip from '@mui/material/Tooltip';
 import IconButton from '@mui/material/IconButton';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -66,15 +64,14 @@ export function ConsolePage() {
    * Ask user for API Key or
    * If we're using the local relay server, we don't need this
    */
-  // Define the getImageSrc function here
-  
+  const apiKey =
+    LOCAL_RELAY_SERVER_URL.trim() !== ''
+      ? '' // If relay server is used, skip the API key
+      : process.env.REACT_APP_OPENAI_API_KEY ||
+        localStorage.getItem('tmp::voice_api_key') ||
+        prompt('Unesite OpenAI API Key') ||
+        '';
 
-  const apiKey = LOCAL_RELAY_SERVER_URL.trim() !== ''
-    ? '' // If relay server is used, skip the API key
-    : process.env.REACT_APP_OPENAI_API_KEY || 
-      localStorage.getItem('tmp::voice_api_key') || 
-      prompt('Unesite OpenAI API Key') || '';
-  
   if (apiKey !== '') {
     localStorage.setItem('tmp::voice_api_key', apiKey);
   }
@@ -129,7 +126,8 @@ export function ConsolePage() {
   const [selectedVoice, setSelectedVoice] = useState('shimmer');
   const [selectedTemplate, setSelectedTemplate] = useState(touristInstructions); // Track the selected template
   const [editableInstructions, setEditableInstructions] = useState(touristInstructions); // Instructions that user can edit
-  const [canPushToTalk, setCanPushToTalk] = useState(true);
+  // Push-to-talk is now disabled since we only use automatic mode:
+  const [canPushToTalk, setCanPushToTalk] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [memoryKv, setMemoryKv] = useState<{ [key: string]: any }>({});
   const [coords, setCoords] = useState<Coordinates | null>({
@@ -137,7 +135,9 @@ export function ConsolePage() {
     lng: -122.418137,
   });
   const [marker, setMarker] = useState<Coordinates | null>(null);
-  const [combinedInstructions, setCombinedInstructions] = useState(`${instructions} ${editableInstructions}`);
+  const [combinedInstructions, setCombinedInstructions] = useState(
+    `${instructions} ${editableInstructions}`
+  );
 
   /**
    * Utility for formatting the timing of logs
@@ -163,7 +163,6 @@ export function ConsolePage() {
   /**
    * When you click the API key
    */
-  
   const resetAPIKey = useCallback(() => {
     const newApiKey = prompt('Unesite OpenAI API Key');
     if (newApiKey !== null) {
@@ -172,70 +171,62 @@ export function ConsolePage() {
       window.location.reload();
     }
   }, []);
-  const handleVoiceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedVoice(event.target.value as "alloy"); 
 
+  const handleVoiceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedVoice(event.target.value as "alloy");
   };
+
   const handleInstructionsChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     // Update editable instructions from the text area
     setEditableInstructions(event.target.value);
   };
-  
+
   const handleTemplateChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedValue = event.target.value;
-  
     // Update selected template and editable instructions
     setSelectedTemplate(selectedValue); // This triggers the first useEffect
     setEditableInstructions(selectedValue); // Synchronize with selected template
   };
-  
-  
+
   /**
    * Connect to conversation:
-   * WavRecorder taks speech input, WavStreamPlayer output, client is API client
+   * This function now forces automatic mode (server_vad) for mic input,
+   * and immediately begins recording without any manual (push-to-talk) intervention.
    */
   const connectConversation = useCallback(async () => {
     const client = clientRef.current;
     const wavRecorder = wavRecorderRef.current;
     const wavStreamPlayer = wavStreamPlayerRef.current;
    
-  
     // Set state variables
     startTimeRef.current = new Date().toISOString();
     setIsConnected(true);
     setRealtimeEvents([]);
     setItems(client.conversation.getItems());
   
-    // Connect to microphone
+    // Connect to microphone and audio output
     await wavRecorder.begin();
-  
-    // Connect to audio output
     await wavStreamPlayer.connect();
   
     // Connect to realtime API
     await client.connect();
   
-    // Ensure that server_vad is set explicitly after connecting
-    // await client.updateSession({
-    //   turn_detection: { type: 'none' }
-    // });
+    // Force automatic mode: server_vad for turn detection
+    await client.updateSession({
+      turn_detection: { type: 'server_vad' },
+    });
   
+    // Automatically start recording microphone input
+    setCanPushToTalk(false);
+    setIsRecording(true);
+    await wavRecorder.record((data) => client.appendInputAudio(data.mono));
+  
+    // Optionally, send an empty message to trigger conversation
     client.sendUserMessageContent([
-      {
-        type: `input_text`,
-        text: ` `,
-      },
+      { type: 'input_text', text: ' ' },
     ]);
-  
-    // Ensure that recording starts if VAD is set to 'server_vad'
-    if (client.getTurnDetectionType() === 'server_vad') {
-      setCanPushToTalk(false); // Disable manual mode
-      setIsRecording(true);  // Ensure recording state is set
-      await wavRecorder.record((data) => client.appendInputAudio(data.mono));
-    }
   }, []);
-  
-  
+
   /**
    * Disconnect and reset conversation state
    */
@@ -266,8 +257,8 @@ export function ConsolePage() {
   }, []);
 
   /**
-   * In push-to-talk mode, start recording
-   * .appendInputAudio() for each sample
+   * In the original code push-to-talk functions were provided.
+   * Since we now only use automatic mode, these functions are not used.
    */
   const startRecording = async () => {
     setIsRecording(true);
@@ -282,9 +273,6 @@ export function ConsolePage() {
     await wavRecorder.record((data) => client.appendInputAudio(data.mono));
   };
 
-  /**
-   * In push-to-talk mode, stop recording
-   */
   const stopRecording = async () => {
     setIsRecording(false);
     const client = clientRef.current;
@@ -294,13 +282,13 @@ export function ConsolePage() {
   };
 
   /**
-   * Switch between Manual <> VAD mode for communication
+   * The changeTurnEndType function is no longer used because
+   * we always enforce automatic mode.
    */
   const changeTurnEndType = async () => {
     const client = clientRef.current;
     const wavRecorder = wavRecorderRef.current;
   
-    // Always use server_vad for turn detection
     client.updateSession({
       turn_detection: { type: 'server_vad' },
     });
@@ -309,10 +297,8 @@ export function ConsolePage() {
       await wavRecorder.record((data) => client.appendInputAudio(data.mono));
     }
   
-    // Since server_vad is used, push-to-talk is not applicable.
     setCanPushToTalk(false);
   };
-  
 
   /**
    * Auto-scroll the event logs
@@ -321,7 +307,6 @@ export function ConsolePage() {
     if (eventsScrollRef.current) {
       const eventsEl = eventsScrollRef.current;
       const scrollHeight = eventsEl.scrollHeight;
-      // Only scroll if height has just changed
       if (scrollHeight !== eventsScrollHeightRef.current) {
         eventsEl.scrollTop = scrollHeight;
         eventsScrollHeightRef.current = scrollHeight;
@@ -342,7 +327,6 @@ export function ConsolePage() {
     }
   }, [items]);
 
- 
   useEffect(() => {
     setEditableInstructions(selectedTemplate);
   }, [selectedTemplate]);
@@ -351,13 +335,11 @@ export function ConsolePage() {
     const combined = `${instructions} ${editableInstructions}`;
     setCombinedInstructions(combined);
   
-    // Push combined instructions to the client session
     const client = clientRef.current;
     if (client) {
       client.updateSession({ instructions: combined });
     }
   }, [instructions, editableInstructions]);
-  
 
   /**
    * Set up render loops for the visualization canvas
@@ -434,16 +416,14 @@ export function ConsolePage() {
    * Set all of our instructions, tools, events and more
    */
   useEffect(() => {
-    // Get refs
     const wavStreamPlayer = wavStreamPlayerRef.current;
     const client = clientRef.current;
 
     // Set voice (alloy, shimmer, echo, coral, sage)
     client.updateSession({ voice: selectedVoice as "alloy"});
-   // client.updateSession({ voice: 'coral' });
-     // Set temperature (min 0.7)
+    // Set temperature (min 0.7)
     client.updateSession({ temperature: 0.8 });
-     // Set instructions
+    // Set instructions
     client.updateSession({ instructions: combinedInstructions });
     // Set transcription, otherwise we don't get user transcriptions back
     client.updateSession({ input_audio_transcription: { model: 'whisper-1' } });
@@ -479,13 +459,10 @@ export function ConsolePage() {
       }
     );
     
-
-    // handle realtime events from client + server for event logging
     client.on('realtime.event', (realtimeEvent: RealtimeEvent) => {
       setRealtimeEvents((realtimeEvents) => {
         const lastEvent = realtimeEvents[realtimeEvents.length - 1];
         if (lastEvent?.event.type === realtimeEvent.event.type) {
-          // if we receive multiple events in a row, aggregate them for display purposes
           lastEvent.count = (lastEvent.count || 0) + 1;
           return realtimeEvents.slice(0, -1).concat(lastEvent);
         } else {
@@ -520,13 +497,10 @@ export function ConsolePage() {
     setItems(client.conversation.getItems());
 
     return () => {
-      // cleanup; resets to defaults
       client.reset();
     };
   } , [selectedVoice, combinedInstructions]);
 
- 
-  
   /**
    * Render the application
    */
@@ -550,9 +524,7 @@ export function ConsolePage() {
                   </span>
                   <ul>
                     <li>Možete me prekinuti u svakom momentu i promeniti tok razgovora.</li>
-                    <li>
-                      Takođe, možete birati između automatskog i ručnog metoda postavljanja pitanja. U ručnom modu pritisnite ikonicu mikrofon i držite dok postavljate pitanje.
-                    </li>
+                    
                   </ul>
   
                   <label htmlFor="voice-select" className="voice-select-label">Odaberite glas:</label>
@@ -562,9 +534,7 @@ export function ConsolePage() {
                     value={selectedVoice}
                     onChange={handleVoiceChange}
                   >
-                   
                     <option value="alloy">Alloy</option>
-                   
                   </select>
   
                   <label htmlFor="instructions-template" className="instructions-select-label">Odaberite template:</label>
@@ -602,13 +572,12 @@ export function ConsolePage() {
   
                   {conversationItem.role === 'assistant' && (
                     <div className="assistant-avatar">
-                    <img
-                      src="/logo.png"
-                      className="assistant-avatar-img"
-                      alt="Assistant Avatar"
-                    />
-                  </div>
-                  
+                      <img
+                        src="/logo.png"
+                        className="assistant-avatar-img"
+                        alt="Assistant Avatar"
+                      />
+                    </div>
                   )}
   
                   <div className={`speaker-content ${conversationItem.role}`}>
@@ -637,21 +606,10 @@ export function ConsolePage() {
           </div>
   
           <div className="content-actions">
-            
-  
-            {isConnected && canPushToTalk && (
-              <IconButton
-                style={{ color: '#f33b4b', marginRight: '30px' }}
-                disabled={!isConnected || !canPushToTalk}
-                onMouseDown={startRecording}
-                onMouseUp={stopRecording}
-                onTouchStart={startRecording}
-                onTouchEnd={stopRecording}
-              >
-                <MicIcon />
-              </IconButton>
-            )}
-  
+            {/*
+              The push-to-talk IconButton has been removed because
+              we now use automatic (server_vad) mode exclusively.
+            */}
             <div className="spacer" />
             <IconButton
               style={{
