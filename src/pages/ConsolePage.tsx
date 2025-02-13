@@ -296,20 +296,23 @@ export function ConsolePage() {
   /**
    * Switch between Manual <> VAD mode for communication
    */
-  const changeTurnEndType = async (value: string) => {
+  const changeTurnEndType = async () => {
     const client = clientRef.current;
     const wavRecorder = wavRecorderRef.current;
-    if (value === 'none' && wavRecorder.getStatus() === 'recording') {
-      await wavRecorder.pause();
-    }
+  
+    // Always use server_vad for turn detection
     client.updateSession({
-      turn_detection: value === 'none' ? null : { type: 'server_vad' },
+      turn_detection: { type: 'server_vad' },
     });
-    if (value === 'server_vad' && client.isConnected()) {
+  
+    if (client.isConnected()) {
       await wavRecorder.record((data) => client.appendInputAudio(data.mono));
     }
-    setCanPushToTalk(value === 'none');
+  
+    // Since server_vad is used, push-to-talk is not applicable.
+    setCanPushToTalk(false);
   };
+  
 
   /**
    * Auto-scroll the event logs
@@ -634,13 +637,7 @@ export function ConsolePage() {
           </div>
   
           <div className="content-actions">
-            <Toggle
-              defaultValue={'none'}
-              labels={['Automatski']}
-              values={['server_vad']}
-              onChange={(_, value) => changeTurnEndType(value)}
-            />
-            <div className="spacer" />
+            
   
             {isConnected && canPushToTalk && (
               <IconButton
