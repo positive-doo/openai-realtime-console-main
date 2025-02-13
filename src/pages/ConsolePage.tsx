@@ -126,7 +126,7 @@ export function ConsolePage() {
     [key: string]: boolean;
   }>({});
   const [isConnected, setIsConnected] = useState(false);
-  const [selectedVoice, setSelectedVoice] = useState('shimmer');
+  const [selectedVoice, setSelectedVoice] = useState('alloy');
   const [selectedTemplate, setSelectedTemplate] = useState(touristInstructions); // Track the selected template
   const [editableInstructions, setEditableInstructions] = useState(touristInstructions); // Instructions that user can edit
   const [canPushToTalk, setCanPushToTalk] = useState(true);
@@ -173,7 +173,7 @@ export function ConsolePage() {
     }
   }, []);
   const handleVoiceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedVoice(event.target.value as "coral" | "sage" | "shimmer" | "alloy" | "echo" | "ash" | "ballad" | "verse"); 
+    setSelectedVoice(event.target.value as "alloy"); 
 
   };
   const handleInstructionsChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -436,7 +436,7 @@ export function ConsolePage() {
     const client = clientRef.current;
 
     // Set voice (alloy, shimmer, echo, coral, sage)
-    client.updateSession({ voice: selectedVoice as "coral" | "sage" | "shimmer" | "alloy"  | "echo" | "ash" | "ballad" | "verse" });
+    client.updateSession({ voice: selectedVoice as "alloy" });
    // client.updateSession({ voice: 'coral' });
      // Set temperature (min 0.7)
     client.updateSession({ temperature: 0.8 });
@@ -559,14 +559,9 @@ export function ConsolePage() {
                     value={selectedVoice}
                     onChange={handleVoiceChange}
                   >
-                    <option value="shimmer">Shimmer</option>
+                    
                     <option value="alloy">Alloy</option>
-                    <option value="echo">Echo</option>
-                    <option value="coral">Coral</option>
-                    <option value="sage">Sage</option>
-                    <option value="ash">Ash</option>
-                    <option value="ballad">Ballad</option>
-                    <option value="verse">Verse</option>
+                    
                   </select>
   
                   <label htmlFor="instructions-template" className="instructions-select-label">Odaberite template:</label>
