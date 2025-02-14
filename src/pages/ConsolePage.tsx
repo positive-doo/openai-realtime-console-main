@@ -127,8 +127,8 @@ export function ConsolePage() {
   }>({});
   const [isConnected, setIsConnected] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState('alloy');
-  const [selectedTemplate, setSelectedTemplate] = useState(touristInstructions); // Track the selected template
-  const [editableInstructions, setEditableInstructions] = useState(touristInstructions); // Instructions that user can edit
+  const [selectedTemplate, setSelectedTemplate] = useState(positiveInstructions); // Track the selected template
+  const [editableInstructions, setEditableInstructions] = useState(positiveInstructions); // Instructions that user can edit
   const [canPushToTalk, setCanPushToTalk] = useState(true);
   const [isRecording, setIsRecording] = useState(false);
   const [memoryKv, setMemoryKv] = useState<{ [key: string]: any }>({});
@@ -571,8 +571,9 @@ export function ConsolePage() {
                     value={selectedTemplate}
                     onChange={handleTemplateChange}
                   >
-                    <option value={touristInstructions}>Turisticka agencija</option>
                     <option value={positiveInstructions}>Positive</option>
+                    <option value={touristInstructions}>Turisticka agencija</option>
+                    
                   </select>
   
                   <label htmlFor="editable-instructions" className="editable-instructions-label">Editable Instructions:</label>
